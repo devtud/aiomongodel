@@ -235,8 +235,24 @@ class BaseDocument(object):
         Returns:
             OrderedDict: Data of the document.
         """
-        # TODO: Add recursive parameter
-        return self._data
+        def list_to_data(sequence):
+            for item in sequence:
+                if isinstance(item, BaseDocument):
+                    yield item.to_data()
+                else:
+                    yield item
+
+        def value_to_data(v):
+            if isinstance(v, BaseDocument):
+                return v.to_data()
+            if isinstance(v, (list, tuple)):
+                return list_to_data(v)
+            return v
+
+        data = {
+            k: value_to_data(v) for k, v in self._data.items()
+        }
+        return data
 
     def _get_field_value_from_data(self, data, field_name):
         """Retrieve value from data for given field_name.
