@@ -1,7 +1,7 @@
 """Base document class."""
 import contextlib
 import warnings
-from collections import OrderedDict
+from collections import OrderedDict, Iterable
 
 from bson import ObjectId, SON
 
@@ -235,7 +235,7 @@ class BaseDocument(object):
         Returns:
             OrderedDict: Data of the document.
         """
-        def list_to_data(sequence):
+        def iter_to_data(sequence):
             for item in sequence:
                 if isinstance(item, BaseDocument):
                     yield item.to_data()
@@ -245,8 +245,8 @@ class BaseDocument(object):
         def value_to_data(v):
             if isinstance(v, BaseDocument):
                 return v.to_data()
-            if isinstance(v, (list, tuple)):
-                return list_to_data(v)
+            if isinstance(v, Iterable) and not isinstance(v, (str, bytes)):
+                return [item for item in iter_to_data(v)]
             return v
 
         data = {
